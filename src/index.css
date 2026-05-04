@@ -1,0 +1,8 @@
+body {
+  margin: 0;
+  font: 18px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+#root {
+  min-height: 100svh;
+}

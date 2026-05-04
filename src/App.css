@@ -1,0 +1,34 @@
+.table {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stack {
+  position: relative;
+  width: 200px;
+  height: 280px;
+}
+
+.card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 280px;
+  background: #dddddd;
+  border: 1px solid #b1b1b1;
+  border-radius: 8px;
+  transform-origin: 50% 160%;
+  animation: fan 0.8s ease-out forwards;
+}
+
+@keyframes fan {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(var(--angle));
+  }
+}
