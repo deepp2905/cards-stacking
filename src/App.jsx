@@ -1,87 +1,78 @@
-import { useEffect, useMemo, useState } from 'react'
-import Card from './Card'
+import { useState } from 'react'
+import StackV1 from './StackV1'
+import StackV2 from './StackV2'
+import StackV3 from './StackV3'
 import './App.css'
 
+const VERSIONS = {
+  1: StackV1,
+  2: StackV2,
+  3: StackV3,
+}
+
 function App() {
-  const cards = [0, 1, 2, 3, 4, 5]
+  const [activeTab, setActiveTab] = useState(1)
   const [playKey, setPlayKey] = useState(0)
-  const [entering, setEntering] = useState(true)
 
-  useEffect(() => {
-    setEntering(true)
-    const t = setTimeout(() => setEntering(false), 400)
-    return () => clearTimeout(t)
-  }, [playKey])
-
-  const delays = useMemo(
-    () =>
-      cards.map((i) => {
-        const distNorm = Math.abs(i - 2.5) / 2.5
-        return 0.02 + distNorm * 0.03 + Math.random() * 0.01
-      }),
-    [playKey]
-  )
-
-  const jitter = useMemo(
-    () =>
-      cards.map(() => ({
-//        rotate: (Math.random() - 0.5) * 2,
-//        x: (Math.random() - 0.5) * -10,
-        y: (Math.random() - 0.5) * 10,
-      })),
-    [playKey]
-  )
-
-  const totalDuration = 0.6
+  const ActiveStack = VERSIONS[activeTab]
 
   return (
     <div className="table">
-      <div className="viewport">
-        <div
-          className="stack"
-          key={playKey}
-          style={{ pointerEvents: entering ? 'none' : 'auto' }}
+      <ActiveStack key={`${activeTab}-${playKey}`} />
+      <div className="controls">
+        <button
+          type="button"
+          className="replay"
+          onClick={() => setPlayKey((k) => k + 1)}
+          aria-label="Replay"
         >
-          {cards.map((i) => {
-            const offset = i - 2.5
-            const angle = offset * 6
-            const x = offset * 20
-            return (
-              <Card
-                key={i}
-                index={i}
-                angle={angle}
-                x={x}
-                delay={delays[i]}
-                jitter={jitter[i]}
-                totalDuration={totalDuration}
-              />
-            )
-          })}
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 12a9 9 0 1 0 3-6.7" />
+            <polyline points="3 3 3 9 9 9" />
+          </svg>
+          Replay
+        </button>
+        <div className="tabs" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 1}
+            className={`tab${activeTab === 1 ? ' active' : ''}`}
+            onClick={() => setActiveTab(1)}
+          >
+            V1
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 2}
+            className={`tab${activeTab === 2 ? ' active' : ''}`}
+            onClick={() => setActiveTab(2)}
+          >
+            V2
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={false}
+            aria-disabled="true"
+            disabled
+            className="tab"
+          >
+            V3
+          </button>
         </div>
       </div>
-      <button
-        type="button"
-        className="replay"
-        onClick={() => setPlayKey((k) => k + 1)}
-        aria-label="Replay"
-      >
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M3 12a9 9 0 1 0 3-6.7" />
-          <polyline points="3 3 3 9 9 9" />
-        </svg>
-        Replay
-      </button>
     </div>
   )
 }
