@@ -31,6 +31,7 @@ function App() {
               style={{ zIndex: i }}
               initial={{ rotate: 0, x: 0 }}
               animate={{ rotate: angle, x }}
+              whileHover={{ y: -20, transition: { duration: 0.1 } }}
               transition={{
                 duration: totalDuration + delays[i],
                 delay: delays[i],
