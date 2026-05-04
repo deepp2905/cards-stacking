@@ -7,7 +7,11 @@ function App() {
   const [playKey, setPlayKey] = useState(0)
 
   const delays = useMemo(
-    () => cards.map(() => 0.02 + Math.random() * 0.02),
+    () =>
+      cards.map((i) => {
+        const distNorm = Math.abs(i - 2.5) / 2.5
+        return 0.02 + distNorm * 0.03 + Math.random() * 0.01
+      }),
     [playKey]
   )
 
@@ -19,7 +23,7 @@ function App() {
         {cards.map((i) => {
           const offset = i - 2.5
           const angle = offset * 6
-          const x = offset * 10
+          const x = offset * 20
           return (
             <motion.div
               key={i}
@@ -28,7 +32,7 @@ function App() {
               initial={{ rotate: 0, x: 0 }}
               animate={{ rotate: angle, x }}
               transition={{
-                duration: totalDuration - delays[i],
+                duration: totalDuration + delays[i],
                 delay: delays[i],
                 ease: [0.2, 0.8, 0.6, 1],
               }}
