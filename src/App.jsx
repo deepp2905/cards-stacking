@@ -65,9 +65,10 @@ function App() {
             type="button"
             role="tab"
             aria-selected={false}
-            aria-disabled="true"
-            disabled
-            className="tab"
+            //aria-disabled="true"
+            //disabled
+            onClick={() => setActiveTab(3)} 
+            className={`tab${activeTab === 3 ? ' active' : ''}`}
           >
             V3
           </button>
