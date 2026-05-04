@@ -22,7 +22,7 @@ function App() {
     [playKey]
   )
 
-  const totalDuration = 0.45
+  const totalDuration = 0.6
 
   return (
     <div className="table">
@@ -44,8 +44,8 @@ function App() {
                 initial={{
                   rotate: 0,
                   x: 0,
-                  y: 500,
-                  boxShadow: '0px 0px 0px rgba(0, 0, 0, 0)',
+                  y: 280,
+                  //boxShadow: '0px 0px 0px rgba(0, 0, 0, 0)',
                 }}
                 animate={{
                   rotate: angle,
@@ -55,7 +55,7 @@ function App() {
                 }}
                 whileHover={{ y: -20, transition: { duration: 0.1 } }}
                 transition={{
-                  y: { duration: 0.4, ease: [0.2, 0.8, 0.6, 1] },
+                  y: { duration: 0.3, ease: [0.2, 0.8, 0.6, 1] },
                   rotate: {
                     duration: totalDuration + delays[i],
                     delay: 0.4 + delays[i],
