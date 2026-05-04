@@ -1,23 +1,36 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import './App.css'
 
 function App() {
   const cards = [0, 1, 2, 3, 4, 5]
   const [playKey, setPlayKey] = useState(0)
 
+  const delays = useMemo(
+    () => cards.map(() => 0.02 + Math.random() * 0.02),
+    [playKey]
+  )
+
+  const totalDuration = 0.45
+
   return (
     <div className="table">
       <div className="stack" key={playKey}>
         {cards.map((i) => {
-          const angle = (i - 2.5) * 6
+          const offset = i - 2.5
+          const angle = offset * 6
+          const x = offset * 10
           return (
-            <div
+            <motion.div
               key={i}
               className="card"
-              style={{
-                '--angle': `${angle}deg`,
-                '--i': i,
-                zIndex: i,
+              style={{ zIndex: i }}
+              initial={{ rotate: 0, x: 0 }}
+              animate={{ rotate: angle, x }}
+              transition={{
+                duration: totalDuration - delays[i],
+                delay: delays[i],
+                ease: [0.2, 0.8, 0.6, 1],
               }}
             />
           )
