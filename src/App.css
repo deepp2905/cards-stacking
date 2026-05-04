@@ -1,8 +1,10 @@
 .table {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 160px;
 }
 
 .stack {
@@ -21,7 +23,9 @@
   border: 1px solid #b1b1b1;
   border-radius: 8px;
   transform-origin: 50% 160%;
-  animation: fan 0.8s ease-out forwards;
+  animation: fan 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: calc(var(--i) * 30ms);
+  transform: rotate(0deg);
 }
 
 @keyframes fan {
@@ -31,4 +35,22 @@
   to {
     transform: rotate(var(--angle));
   }
+}
+
+.replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font: inherit;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+  border: 1px solid #d0d0d0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.replay:hover {
+  background: #f5f5f5;
 }
