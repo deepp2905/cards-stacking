@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
+import Card from './Card'
 import './App.css'
 
 function App() {
@@ -22,6 +22,16 @@ function App() {
     [playKey]
   )
 
+  const jitter = useMemo(
+    () =>
+      cards.map(() => ({
+//        rotate: (Math.random() - 0.5) * 2,
+//        x: (Math.random() - 0.5) * -10,
+        y: (Math.random() - 0.5) * 10,
+      })),
+    [playKey]
+  )
+
   const totalDuration = 0.6
 
   return (
@@ -37,40 +47,14 @@ function App() {
             const angle = offset * 6
             const x = offset * 20
             return (
-              <motion.div
+              <Card
                 key={i}
-                className="card"
-                style={{ zIndex: i }}
-                initial={{
-                  rotate: 0,
-                  x: 0,
-                  y: 280,
-                  //boxShadow: '0px 0px 0px rgba(0, 0, 0, 0)',
-                }}
-                animate={{
-                  rotate: angle,
-                  x,
-                  y: 0,
-                  //boxShadow: '-2px 2px 4px rgba(0, 0, 0, 0.07)',
-                }}
-                whileHover={{ y: -20, transition: { duration: 0.1 } }}
-                transition={{
-                  y: { duration: 0.3, ease: [0.2, 0.8, 0.6, 1] },
-                  rotate: {
-                    duration: totalDuration + delays[i],
-                    delay: 0.4 + delays[i],
-                    ease: [0.2, 0.8, 0.6, 1],
-                  },
-                  x: {
-                    duration: totalDuration + delays[i],
-                    delay: 0.4 + delays[i],
-                    ease: [0.2, 0.8, 0.6, 1],
-                  },
-                  boxShadow: {
-                    duration: totalDuration + delays[i],
-                    delay: 0.4 + delays[i],
-                  },
-                }}
+                index={i}
+                angle={angle}
+                x={x}
+                delay={delays[i]}
+                jitter={jitter[i]}
+                totalDuration={totalDuration}
               />
             )
           })}
