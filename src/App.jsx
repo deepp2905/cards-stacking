@@ -10,6 +10,12 @@ const VERSIONS = {
   3: StackV3,
 }
 
+const DESCRIPTIONS = {
+  1: 'Rightmost card sits on top, sweeps up from below.',
+  2: 'Center card sits on top, stack is mirrored outward.',
+  3: 'Center cards fan first, edges trail like a hand spreading a deck.',
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState(1)
   const [playKey, setPlayKey] = useState(0)
@@ -19,6 +25,7 @@ function App() {
   return (
     <div className="table">
       <ActiveStack key={`${activeTab}-${playKey}`} />
+      <div className="controls-group">
       <div className="controls">
         <button
           type="button"
@@ -73,6 +80,8 @@ function App() {
             V3
           </button>
         </div>
+      </div>
+      <p className="version-description">{DESCRIPTIONS[activeTab]}</p>
       </div>
     </div>
   )
