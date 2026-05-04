@@ -47,7 +47,7 @@ function StackV1() {
               x={x}
               delay={delays[i]}
               jitter={jitter[i]}
-              totalDuration={totalDuration}
+              totalDuration={totalDuration + delays[i]}
             />
           )
         })}
