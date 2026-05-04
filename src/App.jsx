@@ -1,10 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import './App.css'
 
 function App() {
   const cards = [0, 1, 2, 3, 4, 5]
   const [playKey, setPlayKey] = useState(0)
+  const [entering, setEntering] = useState(true)
+
+  useEffect(() => {
+    setEntering(true)
+    const t = setTimeout(() => setEntering(false), 400)
+    return () => clearTimeout(t)
+  }, [playKey])
 
   const delays = useMemo(
     () =>
@@ -19,27 +26,55 @@ function App() {
 
   return (
     <div className="table">
-      <div className="stack" key={playKey}>
-        {cards.map((i) => {
-          const offset = i - 2.5
-          const angle = offset * 6
-          const x = offset * 20
-          return (
-            <motion.div
-              key={i}
-              className="card"
-              style={{ zIndex: i }}
-              initial={{ rotate: 0, x: 0 }}
-              animate={{ rotate: angle, x }}
-              whileHover={{ y: -20, transition: { duration: 0.1 } }}
-              transition={{
-                duration: totalDuration + delays[i],
-                delay: delays[i],
-                ease: [0.2, 0.8, 0.6, 1],
-              }}
-            />
-          )
-        })}
+      <div className="viewport">
+        <div
+          className="stack"
+          key={playKey}
+          style={{ pointerEvents: entering ? 'none' : 'auto' }}
+        >
+          {cards.map((i) => {
+            const offset = i - 2.5
+            const angle = offset * 6
+            const x = offset * 20
+            return (
+              <motion.div
+                key={i}
+                className="card"
+                style={{ zIndex: i }}
+                initial={{
+                  rotate: 0,
+                  x: 0,
+                  y: 500,
+                  boxShadow: '0px 0px 0px rgba(0, 0, 0, 0)',
+                }}
+                animate={{
+                  rotate: angle,
+                  x,
+                  y: 0,
+                  //boxShadow: '-2px 2px 4px rgba(0, 0, 0, 0.07)',
+                }}
+                whileHover={{ y: -20, transition: { duration: 0.1 } }}
+                transition={{
+                  y: { duration: 0.4, ease: [0.2, 0.8, 0.6, 1] },
+                  rotate: {
+                    duration: totalDuration + delays[i],
+                    delay: 0.4 + delays[i],
+                    ease: [0.2, 0.8, 0.6, 1],
+                  },
+                  x: {
+                    duration: totalDuration + delays[i],
+                    delay: 0.4 + delays[i],
+                    ease: [0.2, 0.8, 0.6, 1],
+                  },
+                  boxShadow: {
+                    duration: totalDuration + delays[i],
+                    delay: 0.4 + delays[i],
+                  },
+                }}
+              />
+            )
+          })}
+        </div>
       </div>
       <button
         type="button"
