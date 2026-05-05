@@ -6,7 +6,7 @@ function StackV1() {
   const [entering, setEntering] = useState(true)
 
   useEffect(() => {
-    const t = setTimeout(() => setEntering(false), 400)
+    const t = setTimeout(() => setEntering(false), 1600)
     return () => clearTimeout(t)
   }, [])
 

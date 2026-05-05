@@ -7,29 +7,27 @@ function StackV3() {
   const [entering, setEntering] = useState(true)
 
   useEffect(() => {
-    const t = setTimeout(() => setEntering(false), 1100)
+    const t = setTimeout(() => setEntering(false), 1500)
     return () => clearTimeout(t)
   }, [])
 
-  // Center-out stagger reads as a hand spreading the deck from the middle.
-  // More natural than left-to-right or distance-from-edge ordering.
+  // Center-out radial stagger: center leads the bloom, edges trail.
+  // Reads as something opening, not something sweeping.
   const delays = useMemo(
-    () => cards.map((i) => Math.abs(i - center) * 0.035),
+    () => cards.map((i) => Math.abs(i - center) * 0.05),
     []
   )
 
-  // Subtle organic offsets — small enough that the symmetric fan still
-  // reads as the dominant gesture, large enough to feel hand-placed.
+  // Imperfection on the initial state only. No x-jitter — the deck must
+  // read as a stack, not a pile.
   const jitter = useMemo(
     () =>
       cards.map(() => ({
-        rotate: (Math.random() - 0.5) * 1.5,
-        y: (Math.random() - 0.5) * 8,
+        rotate: (Math.random() - 0.5) * 1.2,
+        y: (Math.random() - 0.5) * 5,
       })),
     []
   )
-
-  const totalDuration = 0.55
 
   return (
     <div className="viewport">
@@ -50,8 +48,12 @@ function StackV3() {
               x={x}
               delay={delays[i]}
               jitter={jitter[i]}
-              totalDuration={totalDuration}
-              startY={500}
+              startY={380}
+              riseDuration={0.4}
+              riseDelay={0.55}
+              totalDuration={0.55}
+              riseEase={[0.33, 1, 0.68, 1]}
+              spreadEase={[0.16, 1, 0.3, 1]}
               style={{ zIndex }}
             />
           )
