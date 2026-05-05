@@ -12,7 +12,7 @@ function Card({
   riseStagger = 0,
   riseEase = [0.2, 0.8, 0.6, 1],
   spreadEase = [0.2, 0.8, 0.6, 1],
-  hoverLift = -20,
+  hoverLift = -50,
   startY = 280,
   className = '',
   style,

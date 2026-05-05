@@ -11,9 +11,9 @@ const VERSIONS = {
 }
 
 const DESCRIPTIONS = {
-  1: 'Rightmost card sits on top, sweeps up from below.',
-  2: 'Center card sits on top, stack is mirrored outward.',
-  3: 'Center cards fan first, edges trail like a hand spreading a deck.',
+  3: 'Rightmost card sits on top, sweeps up from below.',
+  1: 'Center card sits on top, stack is mirrored outward.',
+  2: 'Center cards fan first, edges trail like a hand spreading a deck.',
 }
 
 function App() {

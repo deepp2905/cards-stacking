@@ -1,34 +1,33 @@
 import { useEffect, useMemo, useState } from 'react'
 import Card from './Card'
 
-function StackV2() {
+function StackV3() {
   const cards = [0, 1, 2, 3, 4, 5, 6]
   const center = (cards.length - 1) / 2
   const [entering, setEntering] = useState(true)
 
   useEffect(() => {
-    const t = setTimeout(() => setEntering(false), 400)
+    const t = setTimeout(() => setEntering(false), 1700)
     return () => clearTimeout(t)
   }, [])
 
+  // Center-out radial stagger: center leads the bloom, edges trail.
+  // Reads as something opening, not something sweeping.
   const delays = useMemo(
-    () =>
-      cards.map((i) => {
-        const distNorm = Math.abs(i - center) / center
-        return 0.02 + distNorm * 0.03 + Math.random() * 0.01
-      }),
+    () => cards.map((i) => Math.abs(i - center) * 0.01),
     []
   )
 
+  // Imperfection on the initial state only. No x-jitter — the deck must
+  // read as a stack, not a pile.
   const jitter = useMemo(
     () =>
       cards.map(() => ({
-        y: (Math.random() - 0.5) * 10,
+        rotate: (Math.random() - 0.5) * 1.2,
+        y: (Math.random() - 0.5) * 5,
       })),
     []
   )
-
-  const totalDuration = 0.6
 
   return (
     <div className="viewport">
@@ -41,6 +40,11 @@ function StackV2() {
           const angle = offset * 6
           const x = offset * 20
           const zIndex = cards.length - Math.abs(offset)
+          // Enter in increasing z-index order: edges first, center last.
+          // Within a z-index pair, the left card precedes the right.
+          const riseStagger =
+            (center - Math.abs(offset)) * 2 * 0.05 + (offset > 0 ? 0.05 : 0)
+          const lastRiseStagger = (cards.length - 1) * 0.05
           return (
             <Card
               key={i}
@@ -49,7 +53,13 @@ function StackV2() {
               x={x}
               delay={delays[i]}
               jitter={jitter[i]}
-              totalDuration={totalDuration}
+              startY={380}
+              riseDuration={0.4}
+              riseStagger={riseStagger}
+              riseDelay={lastRiseStagger + 0.5}
+              totalDuration={0.55}
+              riseEase={[0.33, 1, 0.68, 1]}
+              spreadEase={[0.16, 1, 0.3, 1]}
               style={{ zIndex }}
             />
           )
@@ -59,4 +69,4 @@ function StackV2() {
   )
 }
 
-export default StackV2
+export default StackV3

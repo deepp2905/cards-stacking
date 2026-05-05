@@ -1,19 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import Card from './Card'
 
-function StackV1() {
-  const cards = [0, 1, 2, 3, 4, 5]
+function StackV2() {
+  const cards = [0, 1, 2, 3, 4, 5, 6]
+  const center = (cards.length - 1) / 2
   const [entering, setEntering] = useState(true)
 
   useEffect(() => {
-    const t = setTimeout(() => setEntering(false), 1600)
+    const t = setTimeout(() => setEntering(false), 400)
     return () => clearTimeout(t)
   }, [])
 
   const delays = useMemo(
     () =>
       cards.map((i) => {
-        const distNorm = Math.abs(i - 2.5) / 2.5
+        const distNorm = Math.abs(i - center) / center
         return 0.02 + distNorm * 0.03 + Math.random() * 0.01
       }),
     []
@@ -36,9 +37,10 @@ function StackV1() {
         style={{ pointerEvents: entering ? 'none' : 'auto' }}
       >
         {cards.map((i) => {
-          const offset = i - 2.5
+          const offset = i - center
           const angle = offset * 6
           const x = offset * 20
+          const zIndex = cards.length - Math.abs(offset)
           return (
             <Card
               key={i}
@@ -47,7 +49,8 @@ function StackV1() {
               x={x}
               delay={delays[i]}
               jitter={jitter[i]}
-              totalDuration={totalDuration + delays[i]}
+              totalDuration={totalDuration}
+              style={{ zIndex }}
             />
           )
         })}
@@ -56,4 +59,4 @@ function StackV1() {
   )
 }
 
-export default StackV1
+export default StackV2
