@@ -9,6 +9,7 @@ function Card({
   totalDuration = 0.6,
   riseDuration = 0.3,
   riseDelay = 0.4,
+  riseStagger = 0,
   riseEase = [0.2, 0.8, 0.6, 1],
   spreadEase = [0.2, 0.8, 0.6, 1],
   hoverLift = -20,
@@ -31,9 +32,9 @@ function Card({
         x,
         y: 0,
       }}
-      whileHover={{ y: hoverLift, transition: { duration: 0.1 } }}
+      whileHover={{ y: hoverLift, transition: { duration: 0.15 } }}
       transition={{
-        y: { duration: riseDuration, ease: riseEase },
+        y: { duration: riseDuration, delay: riseStagger, ease: riseEase },
         rotate: {
           duration: totalDuration + delay,
           delay: riseDelay + delay,
