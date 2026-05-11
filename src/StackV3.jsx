@@ -1,53 +1,52 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Card from './Card'
+import { useStackDial } from './DialContext'
 
-function StackV1() {
-  const cards = [0, 1, 2, 3, 4, 5]
+const CARDS = [0, 1, 2, 3, 4, 5]
+const CENTER = (CARDS.length - 1) / 2
+
+function seededNoise(index, salt) {
+  const value = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453
+  return value - Math.floor(value)
+}
+
+function StackV3() {
+  const p = useStackDial('v3')
+
   const [entering, setEntering] = useState(true)
 
   useEffect(() => {
-    const t = setTimeout(() => setEntering(false), 1600)
+    const t = setTimeout(() => setEntering(false), p.interaction.enableAfterMs)
     return () => clearTimeout(t)
-  }, [])
-
-  const delays = useMemo(
-    () =>
-      cards.map((i) => {
-        const distNorm = Math.abs(i - 2.5) / 2.5
-        return 0.02 + distNorm * 0.03 + Math.random() * 0.01
-      }),
-    []
-  )
-
-  const jitter = useMemo(
-    () =>
-      cards.map(() => ({
-        y: (Math.random() - 0.5) * 10,
-      })),
-    []
-  )
-
-  const totalDuration = 0.6
+  }, [p.interaction.enableAfterMs])
 
   return (
     <div className="viewport">
-      <div
-        className="stack"
-        style={{ pointerEvents: entering ? 'none' : 'auto' }}
-      >
-        {cards.map((i) => {
-          const offset = i - 2.5
-          const angle = offset * 6
-          const x = offset * 20
+      <div className="stack" style={{ pointerEvents: entering ? 'none' : 'auto' }}>
+        {CARDS.map((i) => {
+          const offset = i - CENTER
+          const distNorm = Math.abs(offset) / CENTER
+          const delay =
+            p.delay.base + distNorm * p.delay.distance + seededNoise(i, 5) * p.delay.random
+          const jitter = {
+            y: (seededNoise(i, 6) - 0.5) * p.jitter.y,
+          }
+
           return (
             <Card
               key={i}
               index={i}
-              angle={angle}
-              x={x}
-              delay={delays[i]}
-              jitter={jitter[i]}
-              totalDuration={totalDuration + delays[i]}
+              angle={offset * p.layout.angleStep}
+              x={offset * p.layout.xStep}
+              delay={delay}
+              jitter={jitter}
+              totalDuration={
+                p.motion.totalDuration + (p.motion.addDelayToDuration ? delay : 0)
+              }
+              riseDuration={p.motion.riseDuration}
+              riseDelay={p.motion.riseDelay}
+              startY={p.motion.startY}
+              hoverLift={-p.motion.hoverLift}
             />
           )
         })}
@@ -56,4 +55,4 @@ function StackV1() {
   )
 }
 
-export default StackV1
+export default StackV3

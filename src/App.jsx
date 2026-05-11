@@ -3,6 +3,7 @@ import StackV1 from './StackV1'
 import StackV2 from './StackV2'
 import StackV3 from './StackV3'
 import StackV4 from './StackV4'
+import { DialProvider } from './DialControls'
 import './App.css'
 
 const VERSIONS = {
@@ -27,7 +28,9 @@ function App() {
 
   return (
     <div className="table">
-      <ActiveStack key={`${activeTab}-${playKey}`} />
+      <DialProvider key={activeTab} activeVersion={activeTab}>
+        <ActiveStack key={`${activeTab}-${playKey}`} />
+      </DialProvider>
       <div className="controls-group">
         <div className="controls">
           <button

@@ -1,23 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Card from './Card'
+import { useStackDial } from './DialContext'
 
 const DEFAULT_CARDS = [0, 1, 2, 3, 4, 5, 6]
-
-const SPRING = {
-  type: 'spring',
-  stiffness: 200,
-  damping: 24,
-}
-
-const AUTO_PLAY_MS = 1400
-const DRAG_ROTATE_STEP = 80
 const RISE_EASE = [0.2, 0.8, 0.6, 1]
 const SPREAD_EASE = [0.2, 0.8, 0.6, 1]
-const SPREAD_DELAY = 0.55
-const SPREAD_DURATION = 0.6
-const CONTROLS_DELAY = SPREAD_DELAY + SPREAD_DURATION / 2
-const WRAP_FADE_MS = 480
 
 function wrapIndex(index, length) {
   return (index + length) % length
@@ -33,45 +21,51 @@ function getRelativeIndex(index, activeIndex, length) {
   return relative
 }
 
-function getCardPose(relative, pointer, hidden = false) {
+function getCardPose(relative, pointer, p, hidden = false) {
   const distance = Math.abs(relative)
   const side = Math.sign(relative)
-  const xPositions = [0, 144, 248, 320]
+  const xPositions = [0, p.layout.cardOneX, p.layout.cardTwoX, p.layout.cardThreeX]
   const visibleDistance = Math.min(distance, xPositions.length - 1)
 
   return {
     x: side * xPositions[visibleDistance],
-    y: distance * 5,
-    z: distance === 0 ? 70 : -distance * 42,
-    scale: distance === 0 ? 1 : Math.max(0.78, 0.94 - distance * 0.07),
+    y: distance * p.layout.sideY,
+    z: distance === 0 ? p.layout.activeZ : -distance * p.layout.zStep,
+    scale:
+      distance === 0
+        ? p.layout.activeScale
+        : Math.max(p.layout.minScale, p.layout.sideScaleBase - distance * p.layout.scaleStep),
     opacity: hidden ? 0 : 1,
-    rotateY: distance === 0 ? pointer.x * 7 : side * -24,
-    rotateX: distance === 0 ? pointer.y * -5 : 0,
-    zIndex: 30 - distance,
+    rotateY:
+      distance === 0 ? pointer.x * p.interaction.pointerRotateY : side * -p.layout.sideRotateY,
+    rotateX: distance === 0 ? pointer.y * -p.interaction.pointerRotateX : 0,
+    zIndex: p.layout.baseZIndex - distance,
   }
 }
 
 const cardVariants = {
-  enter: {
+  enter: ({ p }) => ({
     x: 0,
-    y: 380,
+    y: p.entry.initialY,
     z: 0,
     scale: 1,
     opacity: 1,
     rotateY: 0,
     rotateX: 0,
-  },
-  present: ({ relative, pointer, hidden }) => getCardPose(relative, pointer, hidden),
-  exit: ({ relative }) => ({
-    x: Math.sign(relative || -1) * 180,
-    z: -160,
-    scale: 0.72,
+  }),
+  present: ({ relative, pointer, hidden, p }) => getCardPose(relative, pointer, p, hidden),
+  exit: ({ relative, p }) => ({
+    x: Math.sign(relative || -1) * p.layout.cardThreeX,
+    z: -p.layout.zStep * 3,
+    scale: p.layout.minScale,
     opacity: 1,
-    rotateY: Math.sign(relative || -1) * 28,
+    rotateY: Math.sign(relative || -1) * p.layout.sideRotateY,
   }),
 }
 
 function StackV4({ cards = DEFAULT_CARDS }) {
+  const p = useStackDial('v4')
+
   const [activeIndex, setActiveIndex] = useState(0)
   const [pointer, setPointer] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -82,6 +76,8 @@ function StackV4({ cards = DEFAULT_CARDS }) {
   const wrapFadeTimer = useRef(null)
   const safeCards = useMemo(() => cards.filter((card) => card !== null && card !== undefined), [cards])
   const totalCards = safeCards.length
+  const entryCompleteMs = (p.entry.spreadDelay + p.entry.spreadDuration) * 1000
+  const controlsDelay = p.entry.spreadDelay + p.entry.spreadDuration * p.entry.controlsStart
 
   const hideLeftWrapCard = useCallback(
     (currentIndex) => {
@@ -89,9 +85,9 @@ function StackV4({ cards = DEFAULT_CARDS }) {
       window.clearTimeout(wrapFadeTimer.current)
       wrapFadeTimer.current = window.setTimeout(() => {
         setHiddenWrapIndex(null)
-      }, WRAP_FADE_MS)
+      }, p.interaction.wrapFadeMs)
     },
-    [totalCards]
+    [p.interaction.wrapFadeMs, totalCards]
   )
 
   const navigateTo = useCallback(
@@ -121,10 +117,10 @@ function StackV4({ cards = DEFAULT_CARDS }) {
   useEffect(() => {
     const controlsTimer = window.setTimeout(() => {
       setControlsVisible(true)
-    }, (SPREAD_DELAY + SPREAD_DURATION) * 1000)
+    }, entryCompleteMs)
 
     return () => window.clearTimeout(controlsTimer)
-  }, [])
+  }, [entryCompleteMs])
 
   useEffect(() => {
     if (!controlsVisible || isDragging || isHovered || totalCards < 2) return undefined
@@ -134,10 +130,17 @@ function StackV4({ cards = DEFAULT_CARDS }) {
         hideLeftWrapCard(currentIndex)
         return wrapIndex(currentIndex + 1, totalCards)
       })
-    }, AUTO_PLAY_MS)
+    }, p.interaction.autoPlayMs)
 
     return () => window.clearInterval(interval)
-  }, [controlsVisible, hideLeftWrapCard, isDragging, isHovered, totalCards])
+  }, [
+    controlsVisible,
+    hideLeftWrapCard,
+    isDragging,
+    isHovered,
+    p.interaction.autoPlayMs,
+    totalCards,
+  ])
 
   useEffect(
     () => () => {
@@ -158,7 +161,7 @@ function StackV4({ cards = DEFAULT_CARDS }) {
   }
 
   function handleDrag(_event, info) {
-    const nextSteps = Math.trunc(info.offset.x / DRAG_ROTATE_STEP)
+    const nextSteps = Math.trunc(info.offset.x / p.interaction.dragRotateStep)
     const stepDelta = nextSteps - dragSteps.current
 
     if (stepDelta !== 0) {
@@ -179,13 +182,13 @@ function StackV4({ cards = DEFAULT_CARDS }) {
 
   function getCardTransition() {
     return {
-      y: { duration: 0.4, ease: RISE_EASE },
-      x: { duration: SPREAD_DURATION, delay: SPREAD_DELAY, ease: SPREAD_EASE },
-      z: { duration: SPREAD_DURATION, delay: SPREAD_DELAY, ease: SPREAD_EASE },
-      scale: { duration: SPREAD_DURATION, delay: SPREAD_DELAY, ease: SPREAD_EASE },
-      rotateY: { duration: SPREAD_DURATION, delay: SPREAD_DELAY, ease: SPREAD_EASE },
-      rotateX: { duration: SPREAD_DURATION, delay: SPREAD_DELAY, ease: SPREAD_EASE },
-      opacity: { duration: 0.4, ease: RISE_EASE },
+      y: { duration: p.entry.riseDuration, ease: RISE_EASE },
+      x: { duration: p.entry.spreadDuration, delay: p.entry.spreadDelay, ease: SPREAD_EASE },
+      z: { duration: p.entry.spreadDuration, delay: p.entry.spreadDelay, ease: SPREAD_EASE },
+      scale: { duration: p.entry.spreadDuration, delay: p.entry.spreadDelay, ease: SPREAD_EASE },
+      rotateY: { duration: p.entry.spreadDuration, delay: p.entry.spreadDelay, ease: SPREAD_EASE },
+      rotateX: { duration: p.entry.spreadDuration, delay: p.entry.spreadDelay, ease: SPREAD_EASE },
+      opacity: { duration: p.entry.riseDuration, ease: RISE_EASE },
     }
   }
 
@@ -196,6 +199,13 @@ function StackV4({ cards = DEFAULT_CARDS }) {
   return (
     <div
       className="viewport carousel-viewport"
+      style={{
+        '--carousel-perspective': `${p.layout.perspective}px`,
+        '--carousel-perspective-y': `${p.layout.perspectiveY}%`,
+        '--carousel-arrow-offset': `${p.layout.arrowOffset}px`,
+        '--carousel-arrow-top': `${p.layout.arrowTop}%`,
+        '--carousel-dot-bottom': `${p.layout.dotBottom}px`,
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseMove={handlePointerMove}
       onMouseLeave={() => {
@@ -210,7 +220,11 @@ function StackV4({ cards = DEFAULT_CARDS }) {
         onClick={() => navigateBy(-1)}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: SPREAD_DURATION, delay: CONTROLS_DELAY, ease: SPREAD_EASE }}
+        transition={{
+          duration: p.entry.controlsDuration,
+          delay: controlsDelay,
+          ease: SPREAD_EASE,
+        }}
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M15 5 8 12l7 7" />
@@ -227,7 +241,7 @@ function StackV4({ cards = DEFAULT_CARDS }) {
               if (distance > 3) return null
 
               const hidden = hiddenWrapIndex === index
-              const pose = getCardPose(relative, pointer, hidden)
+              const pose = getCardPose(relative, pointer, p, hidden)
 
               return (
                 <Card
@@ -235,20 +249,23 @@ function StackV4({ cards = DEFAULT_CARDS }) {
                   index={pose.zIndex}
                   className="carousel-card"
                   style={{ zIndex: pose.zIndex }}
-                  custom={{ relative, pointer, hidden }}
+                  custom={{ relative, pointer, hidden, p }}
                   variants={cardVariants}
                   initial="enter"
                   animate="present"
                   exit="exit"
-                  transition={controlsVisible ? SPRING : getCardTransition()}
+                  transition={controlsVisible ? p.motion.spring : getCardTransition()}
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.28}
+                  dragElastic={p.interaction.dragElastic}
                   onDrag={handleDrag}
                   onDragStart={handleDragStart}
                   onDragEnd={handleDragEnd}
-                  whileHover={{ y: -50, transition: { duration: 0.15 } }}
-                  whileTap={{ scale: pose.scale * 0.98 }}
+                  whileHover={{
+                    y: -p.interaction.hoverLift,
+                    transition: { duration: 0.15 },
+                  }}
+                  whileTap={{ scale: pose.scale * p.interaction.tapScale }}
                 />
               )
             })}
@@ -263,7 +280,11 @@ function StackV4({ cards = DEFAULT_CARDS }) {
         onClick={() => navigateBy(1)}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: SPREAD_DURATION, delay: CONTROLS_DELAY, ease: SPREAD_EASE }}
+        transition={{
+          duration: p.entry.controlsDuration,
+          delay: controlsDelay,
+          ease: SPREAD_EASE,
+        }}
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="m9 5 7 7-7 7" />
@@ -275,7 +296,11 @@ function StackV4({ cards = DEFAULT_CARDS }) {
         aria-label="Carousel pagination"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: SPREAD_DURATION, delay: CONTROLS_DELAY, ease: SPREAD_EASE }}
+        transition={{
+          duration: p.entry.controlsDuration,
+          delay: controlsDelay,
+          ease: SPREAD_EASE,
+        }}
       >
         {safeCards.map((card, index) => (
           <motion.button
@@ -286,7 +311,7 @@ function StackV4({ cards = DEFAULT_CARDS }) {
             aria-current={index === activeIndex}
             onClick={() => navigateTo(index)}
             animate={{ width: index === activeIndex ? 20 : 7 }}
-            transition={SPRING}
+            transition={p.motion.spring}
           />
         ))}
       </motion.div>

@@ -1,65 +1,59 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Card from './Card'
+import { useStackDial } from './DialContext'
 
-function StackV3() {
-  const cards = [0, 1, 2, 3, 4, 5, 6]
-  const center = (cards.length - 1) / 2
+const CARDS = [0, 1, 2, 3, 4, 5, 6]
+const CENTER = (CARDS.length - 1) / 2
+const RISE_EASE = [0.33, 1, 0.68, 1]
+const SPREAD_EASE = [0.16, 1, 0.3, 1]
+
+function seededNoise(index, salt) {
+  const value = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453
+  return value - Math.floor(value)
+}
+
+function StackV2() {
+  const p = useStackDial('v2')
+
   const [entering, setEntering] = useState(true)
 
   useEffect(() => {
-    const t = setTimeout(() => setEntering(false), 1700)
+    const t = setTimeout(() => setEntering(false), p.interaction.enableAfterMs)
     return () => clearTimeout(t)
-  }, [])
-
-  // Center-out radial stagger: center leads the bloom, edges trail.
-  // Reads as something opening, not something sweeping.
-  const delays = useMemo(
-    () => cards.map((i) => Math.abs(i - center) * 0.01),
-    []
-  )
-
-  // Imperfection on the initial state only. No x-jitter — the deck must
-  // read as a stack, not a pile.
-  const jitter = useMemo(
-    () =>
-      cards.map(() => ({
-        rotate: (Math.random() - 0.5) * 1.2,
-        y: (Math.random() - 0.5) * 5,
-      })),
-    []
-  )
+  }, [p.interaction.enableAfterMs])
 
   return (
     <div className="viewport">
-      <div
-        className="stack"
-        style={{ pointerEvents: entering ? 'none' : 'auto' }}
-      >
-        {cards.map((i) => {
-          const offset = i - center
-          const angle = offset * 6
-          const x = offset * 20
-          const zIndex = cards.length - Math.abs(offset)
-          // Enter in increasing z-index order: edges first, center last.
-          // Within a z-index pair, the left card precedes the right.
+      <div className="stack" style={{ pointerEvents: entering ? 'none' : 'auto' }}>
+        {CARDS.map((i) => {
+          const offset = i - CENTER
+          const delay = Math.abs(offset) * p.delay.distance
+          const zIndex = p.layout.zIndexBase - Math.abs(offset) * p.layout.zIndexFalloff
           const riseStagger =
-            (center - Math.abs(offset)) * 2 * 0.05 + (offset > 0 ? 0.05 : 0)
-          const lastRiseStagger = (cards.length - 1) * 0.05
+            (CENTER - Math.abs(offset)) * 2 * p.stagger.pairStep +
+            (offset > 0 ? p.stagger.rightOffset : 0)
+          const lastRiseStagger = (CARDS.length - 1) * p.stagger.pairStep
+          const jitter = {
+            rotate: (seededNoise(i, 3) - 0.5) * p.jitter.rotate,
+            y: (seededNoise(i, 4) - 0.5) * p.jitter.y,
+          }
+
           return (
             <Card
               key={i}
               index={i}
-              angle={angle}
-              x={x}
-              delay={delays[i]}
-              jitter={jitter[i]}
-              startY={380}
-              riseDuration={0.4}
+              angle={offset * p.layout.angleStep}
+              x={offset * p.layout.xStep}
+              delay={delay}
+              jitter={jitter}
+              startY={p.motion.startY}
+              riseDuration={p.motion.riseDuration}
               riseStagger={riseStagger}
-              riseDelay={lastRiseStagger + 0.5}
-              totalDuration={0.55}
-              riseEase={[0.33, 1, 0.68, 1]}
-              spreadEase={[0.16, 1, 0.3, 1]}
+              riseDelay={lastRiseStagger + p.stagger.spreadDelayAfterLast}
+              totalDuration={p.motion.totalDuration}
+              riseEase={RISE_EASE}
+              spreadEase={SPREAD_EASE}
+              hoverLift={-p.motion.hoverLift}
               style={{ zIndex }}
             />
           )
@@ -69,4 +63,4 @@ function StackV3() {
   )
 }
 
-export default StackV3
+export default StackV2

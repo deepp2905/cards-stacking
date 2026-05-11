@@ -110,8 +110,8 @@
 }
 
 .carousel-viewport {
-  perspective: 900px;
-  perspective-origin: 50% 46%;
+  perspective: var(--carousel-perspective, 900px);
+  perspective-origin: 50% var(--carousel-perspective-y, 46%);
 }
 
 .carousel-stage {
@@ -146,7 +146,7 @@
 
 .carousel-arrow {
   position: absolute;
-  top: 75%;
+  top: var(--carousel-arrow-top, 75%);
   z-index: 60;
   width: 36px;
   height: 36px;
@@ -180,17 +180,17 @@
 }
 
 .carousel-arrow-left {
-  left: calc(50% - 480px);
+  left: calc(50% - var(--carousel-arrow-offset, 480px));
 }
 
 .carousel-arrow-right {
-  right: calc(50% - 480px);
+  right: calc(50% - var(--carousel-arrow-offset, 480px));
 }
 
 .carousel-dots {
   position: absolute;
   left: 50%;
-  bottom: 8px;
+  bottom: var(--carousel-dot-bottom, 8px);
   z-index: 60;
   display: inline-flex;
   align-items: center;
