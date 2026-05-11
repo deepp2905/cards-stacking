@@ -17,6 +17,7 @@ function Card({
   className = '',
   style,
   children,
+  ...motionProps
 }) {
   return (
     <motion.div
@@ -46,6 +47,7 @@ function Card({
           ease: spreadEase,
         },
       }}
+      {...motionProps}
     >
       {children}
     </motion.div>
