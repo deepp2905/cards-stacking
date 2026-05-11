@@ -118,7 +118,7 @@ const DIAL_PANELS = {
         dotBottom: [8, -40, 120, 1],
       },
       entry: {
-        initialY: [-380, -700, 700, 10],
+        initialY: [380, -700, 700, 10],
         riseDuration: [0.4, 0.1, 2, 0.05],
         spreadDelay: [0.55, 0, 2, 0.05],
         spreadDuration: [0.6, 0.1, 2, 0.05],
