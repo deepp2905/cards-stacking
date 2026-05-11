@@ -14,6 +14,9 @@ const AUTO_PLAY_MS = 1400
 const DRAG_ROTATE_STEP = 80
 const RISE_EASE = [0.2, 0.8, 0.6, 1]
 const SPREAD_EASE = [0.2, 0.8, 0.6, 1]
+const SPREAD_DELAY = 0.55
+const SPREAD_DURATION = 0.6
+const CONTROLS_DELAY = SPREAD_DELAY + SPREAD_DURATION / 2
 const WRAP_FADE_MS = 480
 
 function wrapIndex(index, length) {
@@ -118,7 +121,7 @@ function StackV4({ cards = DEFAULT_CARDS }) {
   useEffect(() => {
     const controlsTimer = window.setTimeout(() => {
       setControlsVisible(true)
-    }, 1300)
+    }, (SPREAD_DELAY + SPREAD_DURATION) * 1000)
 
     return () => window.clearTimeout(controlsTimer)
   }, [])
@@ -177,11 +180,11 @@ function StackV4({ cards = DEFAULT_CARDS }) {
   function getCardTransition() {
     return {
       y: { duration: 0.4, ease: RISE_EASE },
-      x: { duration: 0.4, delay: 0.55, ease: SPREAD_EASE },
-      z: { duration: 0.4, delay: 0.55, ease: SPREAD_EASE },
-      scale: { duration: 0.4, delay: 0.55, ease: SPREAD_EASE },
-      rotateY: { duration: 0.4, delay: 0.55, ease: SPREAD_EASE },
-      rotateX: { duration: 0.4, delay: 0.55, ease: SPREAD_EASE },
+      x: { duration: SPREAD_DURATION, delay: SPREAD_DELAY, ease: SPREAD_EASE },
+      z: { duration: SPREAD_DURATION, delay: SPREAD_DELAY, ease: SPREAD_EASE },
+      scale: { duration: SPREAD_DURATION, delay: SPREAD_DELAY, ease: SPREAD_EASE },
+      rotateY: { duration: SPREAD_DURATION, delay: SPREAD_DELAY, ease: SPREAD_EASE },
+      rotateX: { duration: SPREAD_DURATION, delay: SPREAD_DELAY, ease: SPREAD_EASE },
       opacity: { duration: 0.4, ease: RISE_EASE },
     }
   }
@@ -206,8 +209,8 @@ function StackV4({ cards = DEFAULT_CARDS }) {
         aria-label="Previous card"
         onClick={() => navigateBy(-1)}
         initial={{ opacity: 0 }}
-        animate={{ opacity: controlsVisible ? 1 : 0 }}
-        transition={{ duration: 0.4, ease: SPREAD_EASE }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: SPREAD_DURATION, delay: CONTROLS_DELAY, ease: SPREAD_EASE }}
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M15 5 8 12l7 7" />
@@ -259,8 +262,8 @@ function StackV4({ cards = DEFAULT_CARDS }) {
         aria-label="Next card"
         onClick={() => navigateBy(1)}
         initial={{ opacity: 0 }}
-        animate={{ opacity: controlsVisible ? 1 : 0 }}
-        transition={{ duration: 0.4, ease: SPREAD_EASE }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: SPREAD_DURATION, delay: CONTROLS_DELAY, ease: SPREAD_EASE }}
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="m9 5 7 7-7 7" />
@@ -271,8 +274,8 @@ function StackV4({ cards = DEFAULT_CARDS }) {
         className="carousel-dots"
         aria-label="Carousel pagination"
         initial={{ opacity: 0 }}
-        animate={{ opacity: controlsVisible ? 1 : 0 }}
-        transition={{ duration: 0.4, ease: SPREAD_EASE }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: SPREAD_DURATION, delay: CONTROLS_DELAY, ease: SPREAD_EASE }}
       >
         {safeCards.map((card, index) => (
           <motion.button
