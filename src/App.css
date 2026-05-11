@@ -146,7 +146,7 @@
 
 .carousel-arrow {
   position: absolute;
-  top: 50%;
+  top: 75%;
   z-index: 60;
   width: 36px;
   height: 36px;
@@ -180,11 +180,11 @@
 }
 
 .carousel-arrow-left {
-  left: calc(50% - 185px);
+  left: calc(50% - 480px);
 }
 
 .carousel-arrow-right {
-  right: calc(50% - 185px);
+  right: calc(50% - 480px);
 }
 
 .carousel-dots {
