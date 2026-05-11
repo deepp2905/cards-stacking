@@ -28,7 +28,7 @@ function App() {
 
   return (
     <div className="table">
-      <DialProvider key={activeTab} activeVersion={activeTab}>
+      <DialProvider activeVersion={activeTab}>
         <ActiveStack key={`${activeTab}-${playKey}`} />
       </DialProvider>
       <div className="controls-group">

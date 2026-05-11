@@ -144,7 +144,7 @@ const DIAL_PANELS = {
 
 function DialProvider({ activeVersion, children }) {
   const panel = DIAL_PANELS[activeVersion] ?? DIAL_PANELS[1]
-  const values = useDialKit(panel.name, panel.config)
+  const values = useDialKit('Stack Controls', panel.config)
 
   return (
     <DialContext.Provider value={{ [panel.key]: values }}>
